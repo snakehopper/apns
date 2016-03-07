@@ -1,12 +1,12 @@
 package apns
 
 import (
+	net "appengine/socket"
 	"bytes"
 	"crypto/tls"
 	"encoding/binary"
 	"encoding/hex"
 	"errors"
-	"net"
 	"strings"
 	"time"
 )
@@ -64,7 +64,7 @@ func (client *Client) ListenForFeedback() (err error) {
 		ServerName:   gatewayParts[0],
 	}
 
-	conn, err := net.Dial("tcp", client.Gateway)
+	conn, err := net.Dial(client.ctx, "tcp", client.Gateway)
 	if err != nil {
 		FeedbackErrChannel <- err
 		return err
