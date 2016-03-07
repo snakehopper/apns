@@ -20,6 +20,9 @@ var FeedbackChannel = make(chan (*FeedbackResponse))
 // If there's nothing to read, ShutdownChannel gets a true.
 var ShutdownChannel = make(chan bool)
 
+// If there's error when connect Feedback Service, FeedbackErrChannel gets a error.
+var FeedbackErrChannel = make(chan error)
+
 // FeedbackResponse represents a device token that Apple has
 // indicated should not be sent to in the future.
 type FeedbackResponse struct {
@@ -51,6 +54,7 @@ func (client *Client) ListenForFeedback() (err error) {
 	}
 
 	if err != nil {
+		FeedbackErrChannel <- err
 		return err
 	}
 
@@ -62,6 +66,7 @@ func (client *Client) ListenForFeedback() (err error) {
 
 	conn, err := net.Dial("tcp", client.Gateway)
 	if err != nil {
+		FeedbackErrChannel <- err
 		return err
 	}
 	defer conn.Close()
@@ -70,6 +75,7 @@ func (client *Client) ListenForFeedback() (err error) {
 	tlsConn := tls.Client(conn, conf)
 	err = tlsConn.Handshake()
 	if err != nil {
+		FeedbackErrChannel <- err
 		return err
 	}
 
@@ -91,7 +97,9 @@ func (client *Client) ListenForFeedback() (err error) {
 		binary.Read(r, binary.BigEndian, &tokenLength)
 		binary.Read(r, binary.BigEndian, &deviceToken)
 		if tokenLength != 32 {
-			return errors.New("token length should be equal to 32, but isn't")
+			err := errors.New("token length should be equal to 32, but isn't")
+			FeedbackErrChannel <- err
+			return err
 		}
 		resp.DeviceToken = hex.EncodeToString(deviceToken)
 
