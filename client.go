@@ -1,10 +1,10 @@
 package apns
 
 import (
-	"appengine"
-	net "appengine/socket"
 	"crypto/tls"
 	"errors"
+	"golang.org/x/net/context"
+	net "google.golang.org/appengine/socket"
 	"strings"
 	"time"
 )
@@ -34,12 +34,12 @@ type Client struct {
 	KeyFile           string
 	KeyBase64         string
 
-	ctx appengine.Context
+	ctx context.Context
 }
 
 // BareClient can be used to set the contents of your
 // certificate and key blocks manually.
-func BareClient(ctx appengine.Context, gateway, certificateBase64, keyBase64 string) (c *Client) {
+func BareClient(ctx context.Context, gateway, certificateBase64, keyBase64 string) (c *Client) {
 	c = new(Client)
 	c.Gateway = gateway
 	c.CertificateBase64 = certificateBase64

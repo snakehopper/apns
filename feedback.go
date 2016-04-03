@@ -1,12 +1,12 @@
 package apns
 
 import (
-	net "appengine/socket"
 	"bytes"
 	"crypto/tls"
 	"encoding/binary"
 	"encoding/hex"
 	"errors"
+	net "google.golang.org/appengine/socket"
 	"strings"
 	"time"
 )
